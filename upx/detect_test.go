@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,36 @@
  * limitations under the License.
  */
 
-package compress_test
+package upx_test
 
 import (
 	"testing"
 
+	"github.com/buildpacks/libcnb"
+	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
-	"github.com/sclevine/spec/report"
+
+	"github.com/paketo-buildpacks/upx/upx"
 )
 
-func TestUnit(t *testing.T) {
-	suite := spec.New("compress", spec.Report(report.Terminal{}))
-	suite("Build", testBuild)
-	suite("Detect", testDetect)
-	suite("UPX", testUpx)
-	suite.Run(t)
+func testDetect(t *testing.T, context spec.G, it spec.S) {
+	var (
+		Expect = NewWithT(t).Expect
+
+		ctx    libcnb.DetectContext
+		detect upx.Detect
+	)
+
+	it("includes build plan options", func() {
+		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: "upx"},
+					},
+				},
+			},
+		}))
+	})
 }

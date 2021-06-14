@@ -1,18 +1,16 @@
-# `gcr.io/paketo-buildpacks/compress-executable`
+# `gcr.io/paketo-buildpacks/upx`
 
-The Paketo Compress Executable Buildpack is a Cloud Native Buildpack that will compress an executable file, saving space in the resulting image.
+The Paketo UPX Buildpack is a Cloud Native Buildpack that providex UPX a tool that can be used to compress executables.
 
 ## Behavior
 
 This buildpack will participate all the following conditions are met
 
-* TBD
+* Another buildpack requires `upx`
 
 The buildpack will do the following:
 
-* If `upx` is selected as the compression mechanism, `upx` will be installed
-* If `upx` is not selected `gzexe` will be used instead
-* The target executable will be compressed using the selected tool and placed into the resulting layer
+* Contributes UPX to a layer marked `build` and `cache` with command on `$PATH`
 
 ## License
 

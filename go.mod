@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/compress-executable
+module github.com/paketo-buildpacks/upx
 
 go 1.16
 

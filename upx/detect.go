@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package compress
+package upx
 
 import (
 	"github.com/buildpacks/libcnb"

@@ -15,10 +15,10 @@
 api = "0.6"
 
 [buildpack]
-id       = "paketo-buildpacks/compress-executable"
-name     = "Paketo Compress Executable Buildpack"
+id       = "paketo-buildpacks/upx"
+name     = "Paketo UPX Buildpack"
 version  = "{{.version}}"
-homepage = "https://github.com/paketo-buildpacks/compress-executable"
+homepage = "https://github.com/paketo-buildpacks/upx"
 
 [[stacks]]
 id = "io.buildpacks.stacks.bionic"

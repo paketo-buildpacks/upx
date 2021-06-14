@@ -14,58 +14,58 @@
  * limitations under the License.
  */
 
-package compress_test
+package upx_test
 
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/compress-executable/compress"
 	"github.com/sclevine/spec"
+
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/upx/upx"
 )
 
-func testBuild(t *testing.T, context spec.G, it spec.S) {
+func testUpx(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		build compress.Build
-		ctx   libcnb.BuildContext
+		ctx libcnb.BuildContext
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build")
+		ctx.Layers.Path, err = ioutil.TempDir("", "upx-layers")
 		Expect(err).NotTo(HaveOccurred())
-
-		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
-		ctx.Buildpack.Metadata = map[string]interface{}{
-			"dependencies": []map[string]interface{}{
-				{
-					"id":      "upx",
-					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id"},
-				},
-			},
-		}
-		ctx.StackID = "test-stack-id"
 	})
 
 	it.After(func() {
-		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
+		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
 	})
 
 	it("contributes UPX", func() {
-		result, err := build.Build(ctx)
+		dep := libpak.BuildpackDependency{
+			URI:    "https://localhost/stub-upx.tar.xz",
+			SHA256: "0db0def1ac244f6d8dfc459ad773e7838b7e5c2d66abbb3f496ee06450c0bf5e",
+		}
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+
+		j, _ := upx.NewUpx(dep, dc)
+		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
+		layer, err = j.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
+		Expect(layer.LayerTypes.Build).To(BeTrue())
+		Expect(layer.LayerTypes.Cache).To(BeTrue())
+		Expect(layer.LayerTypes.Launch).To(BeFalse())
+		Expect(filepath.Join(layer.Path, "stub-upx")).To(BeARegularFile())
 	})
+
 }
