@@ -23,17 +23,20 @@ homepage = "https://github.com/paketo-buildpacks/compress-executable"
 [[stacks]]
 id = "io.buildpacks.stacks.bionic"
 
-# [[metadata.dependencies]]
-# id      = ""
-# name    = ""
-# version = ""
-# uri     = ""
-# sha256  = ""
-# stacks  = [ "io.buildpacks.stacks.bionic" ]
+[[stacks]]
+id = "org.cloudfoundry.stacks.cflinuxfs3"
 
-#   [[metadata.dependencies.licenses]]
-#   type = "<TYPE>"
-#   uri  = "<URI>"
+[[metadata.dependencies]]
+id      = "upx"
+name    = "UPX (The Ultimate Packer for eXecutables)"
+version = "3.96"
+uri     = "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz"
+sha256  = "ac75f5172c1c530d1b5ce7215ca9e94586c07b675a26af3b97f8421b8b8d413d"
+stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
+
+  [[metadata.dependencies.licenses]]
+  type = "GPL-2.0-or-later"
+  uri  = "https://github.com/upx/upx/blob/devel/LICENSE"
 
 [metadata]
 pre-package   = "scripts/build.sh"
