@@ -51,7 +51,7 @@ func testUpx(t *testing.T, context spec.G, it spec.S) {
 	it("contributes UPX", func() {
 		dep := libpak.BuildpackDependency{
 			URI:    "https://localhost/stub-upx.tar.xz",
-			SHA256: "0db0def1ac244f6d8dfc459ad773e7838b7e5c2d66abbb3f496ee06450c0bf5e",
+			SHA256: "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 

@@ -19,6 +19,7 @@ package upx
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
@@ -46,6 +47,16 @@ func (u Upx) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		u.Logger.Bodyf("Expanding to %s", layer.Path)
 		if err := crush.ExtractTarXz(artifact, layer.Path, 1); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand UPX\n%w", err)
+		}
+
+		binDir := filepath.Join(layer.Path, "bin")
+
+		if err := os.MkdirAll(binDir, 0755); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to mkdir\n%w", err)
+		}
+
+		if err := os.Symlink(filepath.Join(layer.Path, "upx"), filepath.Join(binDir, "upx")); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to symlink UPX\n%w", err)
 		}
 
 		return layer, nil
