@@ -16,5 +16,17 @@
 
 package main
 
+import (
+	"os"
+
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/upx/upx"
+)
+
 func main() {
+	libpak.Main(
+		upx.Detect{},
+		upx.Build{Logger: bard.NewLogger(os.Stdout)},
+	)
 }
