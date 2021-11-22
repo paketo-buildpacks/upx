@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-api = "0.6"
+api = "0.7"
 
 [buildpack]
   description = "A Cloud Native Buildpack that provides the UPX binary compression tool"
@@ -21,6 +21,7 @@ api = "0.6"
   keywords = ["upx", "compression"]
   name = "Paketo UPX Buildpack"
   version = "{{.version}}"
+  sbom-formats = ["application/vnd.syft+json", "application/vnd.cyclonedx+json"]
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
@@ -37,6 +38,10 @@ api = "0.6"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz"
     version = "3.96"
+    purl = "pkg:generic/upx@3.96?arch=amd64"
+    cpes = [
+      "cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"
+    ]
 
     [[metadata.dependencies.licenses]]
       type = "GPL-2.0-or-later"
