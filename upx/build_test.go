@@ -58,7 +58,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
 	})
 
-	it("contributes UPX", func() {
+	it("contributes UPX for API <= 0.6", func() {
+		ctx.Buildpack.API = "0.6"
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -67,5 +68,26 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(result.BOM.Entries).To(HaveLen(1))
 		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
+	})
+	it("contributes UPX for API 0.7+", func() {
+		ctx.Buildpack.Metadata = map[string]interface{}{
+			"dependencies": []map[string]interface{}{
+				{
+					"id":      "upx",
+					"version": "3.96",
+					"stacks":  []interface{}{"test-stack-id"},
+					"cpes":    []string{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
+					"purl":    "pkg:generic/upx@3.96?arch=amd64",
+				},
+			},
+		}
+		ctx.Buildpack.API = "0.7"
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(1))
+		Expect(result.Layers[0].Name()).To(Equal("upx"))
+
+		Expect(result.BOM.Entries).To(HaveLen(0))
 	})
 }
