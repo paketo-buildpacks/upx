@@ -15,3 +15,14 @@ docker_credentials:
 - registry: gcr.io
   username: _json_key
   password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+
+dependencies:
+- name:            UPX CLI
+  id:              upx
+  uses:            docker://ghcr.io/paketo-buildpacks/actions/github-release-dependency:main
+  with:
+    glob:       upx-.+-amd64_linux.tar.xz
+    owner:      upx
+    repository: upx
+    tag_filter: v(3.*)
+    token:      ${{ secrets.JAVA_GITHUB_TOKEN }}
