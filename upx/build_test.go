@@ -69,6 +69,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(result.BOM.Entries).To(HaveLen(1))
 		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
 	})
+
 	it("contributes UPX for API 0.7+", func() {
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"dependencies": []map[string]interface{}{
@@ -88,6 +89,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(result.Layers).To(HaveLen(1))
 		Expect(result.Layers[0].Name()).To(Equal("upx"))
 
-		Expect(result.BOM.Entries).To(HaveLen(0))
+		Expect(result.BOM.Entries).To(HaveLen(1))
+		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
 	})
 }
