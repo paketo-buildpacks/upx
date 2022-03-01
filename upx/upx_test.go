@@ -27,7 +27,7 @@ import (
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/upx/upx"
+	"github.com/paketo-buildpacks/upx/v3/upx"
 )
 
 func testUpx(t *testing.T, context spec.G, it spec.S) {

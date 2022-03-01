@@ -23,7 +23,7 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/upx/upx"
+	"github.com/paketo-buildpacks/upx/v3/upx"
 	"github.com/sclevine/spec"
 )
 
