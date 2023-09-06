@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,13 @@
 package main
 
 import (
-	"os"
-
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/upx/v3/upx"
+	"github.com/paketo-buildpacks/libpak/v2"
+	"github.com/paketo-buildpacks/upx/v4/upx"
 )
 
 func main() {
-	libpak.Main(
-		upx.Detect{},
-		upx.Build{Logger: bard.NewLogger(os.Stdout)},
+	libpak.BuildpackMain(
+		upx.Detect,
+		libpak.ContributableBuildFunc(upx.Build),
 	)
 }

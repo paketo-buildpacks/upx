@@ -17,17 +17,16 @@
 package upx_test
 
 import (
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/upx/v3/upx"
+	"github.com/paketo-buildpacks/libpak/v2"
+	"github.com/paketo-buildpacks/libpak/v2/log"
+	"github.com/paketo-buildpacks/upx/v4/upx"
 )
 
 func testUpx(t *testing.T, context spec.G, it spec.S) {
@@ -38,28 +37,23 @@ func testUpx(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
-
-		ctx.Layers.Path, err = ioutil.TempDir("", "upx-layers")
-		Expect(err).NotTo(HaveOccurred())
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
+		ctx.Layers.Path = t.TempDir()
 	})
 
 	it("contributes UPX", func() {
-		dep := libpak.BuildpackDependency{
+		logger := log.NewDiscardLogger()
+
+		dep := libpak.BuildModuleDependency{
 			URI:    "https://localhost/stub-upx.tar.xz",
 			SHA256: "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
 		}
-		dc := libpak.DependencyCache{CachePath: "testdata"}
+		dc := libpak.DependencyCache{CachePath: "testdata", Logger: logger}
 
-		j, _ := upx.NewUpx(dep, dc)
+		j := upx.NewUpx(dep, dc, logger)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		layer, err = j.Contribute(layer)
+		err = j.Contribute(&layer)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(layer.LayerTypes.Build).To(BeTrue())

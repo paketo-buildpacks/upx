@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,46 +18,58 @@ package upx
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/buildpacks/libcnb/v2"
+	"github.com/paketo-buildpacks/libpak/v2"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 )
 
-type Build struct {
-	Logger bard.Logger
-}
+func Build(context libcnb.BuildContext, result *libcnb.BuildResult) ([]libpak.Contributable, error) {
+	logger := log.NewPaketoLogger(os.Stdout)
+	logger.Title(context.Buildpack.Info.Name, context.Buildpack.Info.Version, context.Buildpack.Info.Homepage)
 
-func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
-	b.Logger.Title(context.Buildpack)
-	result := libcnb.NewBuildResult()
-
-	dc, err := libpak.NewDependencyCache(context)
+	dc, err := libpak.NewDependencyCache(context.Buildpack.Info.ID, context.Buildpack.Info.Version, context.Buildpack.Path, context.Platform.Bindings, logger)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
+		return []libpak.Contributable{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 	}
-	dc.Logger = b.Logger
+	dc.Logger = logger
+
+	// Look! I can now set these in a layer contributor
+	result.Labels = append(result.Labels, libcnb.Label{
+		Key:   "foo",
+		Value: "bar",
+	})
+	result.Processes = append(result.Processes, libcnb.Process{
+		Command: []string{"bash -c \"sleep 99\""},
+		Default: false,
+	})
+	result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: "baz"})
 
 	pr := libpak.PlanEntryResolver{Plan: context.Plan}
 
 	if _, ok, err := pr.Resolve(PlanEntryUpx); err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve UPX plan entry\n%w", err)
+		return []libpak.Contributable{}, fmt.Errorf("unable to resolve UPX plan entry\n%w", err)
 	} else if ok {
-		dr, err := libpak.NewDependencyResolver(context)
+		buildModuleMetadata, err := libpak.NewBuildModuleMetadata(context.Buildpack.Metadata)
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
+			return []libpak.Contributable{}, fmt.Errorf("unable to make build module metadata from %+v\n%w", context.Buildpack.Metadata, err)
+		}
+
+		dr, err := libpak.NewDependencyResolver(buildModuleMetadata, context.StackID)
+		if err != nil {
+			return []libpak.Contributable{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
 		}
 
 		upxDependency, err := dr.Resolve(PlanEntryUpx, "")
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+			return []libpak.Contributable{}, fmt.Errorf("unable to find dependency\n%w", err)
 		}
 
-		upx, be := NewUpx(upxDependency, dc)
+		upx := NewUpx(upxDependency, dc, logger)
 
-		result.Layers = append(result.Layers, upx)
-		result.BOM.Entries = append(result.BOM.Entries, be)
+		return []libpak.Contributable{upx}, nil
 	}
 
-	return result, nil
+	return []libpak.Contributable{}, nil
 }

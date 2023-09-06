@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,11 @@
 package upx_test
 
 import (
-	"io/ioutil"
-	"os"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/upx/v3/upx"
+	"github.com/paketo-buildpacks/upx/v4/upx"
 	"github.com/sclevine/spec"
 )
 
@@ -31,14 +29,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		build upx.Build
-		ctx   libcnb.BuildContext
+		ctx    libcnb.BuildContext
+		result libcnb.BuildResult
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build")
+		ctx.ApplicationPath = t.TempDir()
 		Expect(err).NotTo(HaveOccurred())
 
 		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
@@ -52,25 +50,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 		ctx.StackID = "test-stack-id"
+
+		result = libcnb.NewBuildResult()
 	})
 
-	it.After(func() {
-		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
-	})
-
-	it("contributes UPX for API <= 0.6", func() {
-		ctx.Buildpack.API = "0.6"
-		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
-	})
-
-	it("contributes UPX for API 0.7+", func() {
+	it("contributes UPX", func() {
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"dependencies": []map[string]interface{}{
 				{
@@ -83,13 +67,19 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 		ctx.Buildpack.API = "0.7"
-		result, err := build.Build(ctx)
+		layerContributors, err := upx.Build(ctx, &result)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
+		Expect(result.Labels).To(ContainElement(libcnb.Label{
+			Key:   "foo",
+			Value: "bar",
+		}))
+		Expect(result.Processes).To(ContainElement(libcnb.Process{
+			Command: []string{"bash -c \"sleep 99\""},
+			Default: false,
+		}))
+		Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "baz"}))
+		Expect(layerContributors).To(HaveLen(1))
+		Expect(layerContributors[0].Name()).To(Equal("upx"))
 	})
 }
