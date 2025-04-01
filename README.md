@@ -1,4 +1,4 @@
-# `gcr.io/paketo-buildpacks/upx`
+# `paketo-buildpacks/upx`
 
 The Paketo Buildpack for UPX is a Cloud Native Buildpack that providex UPX a tool that can be used to compress executables.
 
