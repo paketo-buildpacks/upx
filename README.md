@@ -1,4 +1,7 @@
-# `gcr.io/paketo-buildpacks/upx`
+# Paketo Buildpack for UPX
+
+## Buildpack ID: `paketo-buildpacks/upx`
+## Registry URLs: `docker.io/paketobuildpacks/upx`
 
 The Paketo Buildpack for UPX is a Cloud Native Buildpack that providex UPX a tool that can be used to compress executables.
 
