@@ -18,6 +18,7 @@ package upx_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/buildpacks/libcnb/v2"
@@ -41,6 +42,17 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		ctx.ApplicationPath, err = os.MkdirTemp("", "build")
 		Expect(err).NotTo(HaveOccurred())
 
+		ctx.Layers.Path, err = os.MkdirTemp("", "layers")
+		Expect(err).NotTo(HaveOccurred())
+
+		ctx.Buildpack.Path, err = os.MkdirTemp("", "buildpack")
+		Expect(err).NotTo(HaveOccurred())
+
+		// Symlink dependencies to testdata (NewDependencyCache expects <buildpackPath>/dependencies/<sha256>)
+		testdataAbs, err := filepath.Abs("testdata")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(os.Symlink(testdataAbs, filepath.Join(ctx.Buildpack.Path, "dependencies"))).To(Succeed())
+
 		logger = log.NewPaketoLogger(os.Stdout)
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
@@ -51,6 +63,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					"stacks":  []interface{}{"test-stack-id", "*"},
 					"cpes":    []interface{}{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
 					"purl":    "pkg:generic/upx@3.96",
+					"uri":     "https://localhost/stub-upx.tar.xz",
+					"sha256":  "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
 				},
 			},
 		}
@@ -60,6 +74,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	it.After(func() {
 		Expect(os.RemoveAll(ctx.ApplicationPath)).To(Succeed())
+		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
+		Expect(os.RemoveAll(ctx.Buildpack.Path)).To(Succeed())
+	})
+
+	it("contributes UPX when in plan", func() {
+		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
+
+		result, err := upx.NewBuild(logger)(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(1))
+		Expect(result.Layers[0].Name).To(Equal("upx"))
 	})
 
 	it("does not contribute UPX when not in plan", func() {
