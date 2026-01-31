@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 package upx_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/v2"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/paketo-buildpacks/upx/v3/upx"
 )
 
@@ -34,14 +34,17 @@ func testUpx(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx libcnb.BuildContext
+		ctx    libcnb.BuildContext
+		logger log.Logger
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "upx-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "upx-layers")
 		Expect(err).NotTo(HaveOccurred())
+
+		logger = log.NewPaketoLogger(os.Stdout)
 	})
 
 	it.After(func() {
@@ -49,17 +52,21 @@ func testUpx(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes UPX", func() {
-		dep := libpak.BuildpackDependency{
+		dep := libpak.BuildModuleDependency{
 			URI:    "https://localhost/stub-upx.tar.xz",
 			SHA256: "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
 		}
-		dc := libpak.DependencyCache{CachePath: "testdata"}
+		dc := libpak.DependencyCache{
+			CachePath:    "testdata",
+			DownloadPath: t.TempDir(),
+			Logger:       logger,
+		}
 
-		j, _ := upx.NewUpx(dep, dc)
+		j := upx.NewUpx(dep, dc, logger)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		layer, err = j.Contribute(layer)
+		err = j.Contribute(&layer)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(layer.LayerTypes.Build).To(BeTrue())

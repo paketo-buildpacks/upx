@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package upx_test
 
 import (
+	"os"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
 	. "github.com/onsi/gomega"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/upx/v3/upx"
@@ -30,12 +32,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx    libcnb.DetectContext
-		detect upx.Detect
+		ctx libcnb.DetectContext
 	)
 
 	it("includes build plan options", func() {
-		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
+		logger := log.NewPaketoLogger(os.Stdout)
+		Expect(upx.NewDetect(logger)(ctx)).To(Equal(libcnb.DetectResult{
 			Pass: true,
 			Plans: []libcnb.BuildPlan{
 				{

@@ -3,20 +3,22 @@ module github.com/paketo-buildpacks/upx/v3
 go 1.25
 
 require (
-	github.com/buildpacks/libcnb v1.30.4
+	github.com/buildpacks/libcnb/v2 v2.0.0
 	github.com/onsi/gomega v1.38.3
-	github.com/paketo-buildpacks/libpak v1.73.0
+	github.com/paketo-buildpacks/libpak/v2 v2.0.0
 	github.com/sclevine/spec v1.4.0
 )
 
 require (
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/BurntSushi/toml v1.5.0 // indirect
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/heroku/color v0.0.6 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect

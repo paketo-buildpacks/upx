@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,45 +21,43 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/crush"
+	"github.com/buildpacks/libcnb/v2"
+	"github.com/paketo-buildpacks/libpak/v2"
+	"github.com/paketo-buildpacks/libpak/v2/crush"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 )
 
 type Upx struct {
 	LayerContributor libpak.DependencyLayerContributor
-	Logger           bard.Logger
+	Logger           log.Logger
 }
 
-func NewUpx(dependency libpak.BuildpackDependency, cache libpak.DependencyCache) (Upx, libcnb.BOMEntry) {
-	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
+func NewUpx(dependency libpak.BuildModuleDependency, cache libpak.DependencyCache, logger log.Logger) Upx {
+	contributor := libpak.NewDependencyLayerContributor(dependency, cache, libcnb.LayerTypes{
 		Build: true,
 		Cache: true,
-	})
-	return Upx{LayerContributor: contributor}, entry
+	}, logger)
+	return Upx{LayerContributor: contributor, Logger: logger}
 }
 
-func (u Upx) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
-	u.LayerContributor.Logger = u.Logger
-
-	return u.LayerContributor.Contribute(layer, func(artifact *os.File) (libcnb.Layer, error) {
+func (u *Upx) Contribute(layer *libcnb.Layer) error {
+	return u.LayerContributor.Contribute(layer, func(layer *libcnb.Layer, artifact *os.File) error {
 		u.Logger.Bodyf("Expanding to %s", layer.Path)
-		if err := crush.ExtractTarXz(artifact, layer.Path, 1); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to expand UPX\n%w", err)
+		if err := crush.Extract(artifact, layer.Path, 1); err != nil {
+			return fmt.Errorf("unable to expand UPX\n%w", err)
 		}
 
 		binDir := filepath.Join(layer.Path, "bin")
 
 		if err := os.MkdirAll(binDir, 0755); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to mkdir\n%w", err)
+			return fmt.Errorf("unable to mkdir\n%w", err)
 		}
 
 		if err := os.Symlink(filepath.Join(layer.Path, "upx"), filepath.Join(binDir, "upx")); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to symlink UPX\n%w", err)
+			return fmt.Errorf("unable to symlink UPX\n%w", err)
 		}
 
-		return layer, nil
+		return nil
 	})
 }
 

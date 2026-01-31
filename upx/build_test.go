@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package upx_test
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
 	. "github.com/onsi/gomega"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/paketo-buildpacks/upx/v3/upx"
 	"github.com/sclevine/spec"
 )
@@ -31,65 +31,42 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		build upx.Build
-		ctx   libcnb.BuildContext
+		ctx    libcnb.BuildContext
+		logger log.Logger
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build")
+		ctx.ApplicationPath, err = os.MkdirTemp("", "build")
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
+		logger = log.NewPaketoLogger(os.Stdout)
+
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"dependencies": []map[string]interface{}{
 				{
 					"id":      "upx",
 					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id"},
+					"stacks":  []interface{}{"test-stack-id", "*"},
+					"cpes":    []interface{}{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
+					"purl":    "pkg:generic/upx@3.96",
 				},
 			},
 		}
 		ctx.StackID = "test-stack-id"
+		t.Setenv("BP_ARCH", "amd64")
 	})
 
 	it.After(func() {
-		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
+		Expect(os.RemoveAll(ctx.ApplicationPath)).To(Succeed())
 	})
 
-	it("contributes UPX for API <= 0.6", func() {
-		ctx.Buildpack.API = "0.6"
-		result, err := build.Build(ctx)
+	it("does not contribute UPX when not in plan", func() {
+		// No plan entry for upx
+		result, err := upx.NewBuild(logger)(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
-	})
-
-	it("contributes UPX for API 0.7+", func() {
-		ctx.Buildpack.Metadata = map[string]interface{}{
-			"dependencies": []map[string]interface{}{
-				{
-					"id":      "upx",
-					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id"},
-					"cpes":    []string{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
-					"purl":    "pkg:generic/upx@3.96?arch=amd64",
-				},
-			},
-		}
-		ctx.Buildpack.API = "0.7"
-		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
+		Expect(result.Layers).To(BeEmpty())
 	})
 }
