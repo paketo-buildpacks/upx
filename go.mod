@@ -4,6 +4,7 @@ go 1.25.6
 
 require (
 	github.com/buildpacks/libcnb/v2 v2.1.0
+	github.com/dmikusa/bptest v0.0.1
 	github.com/onsi/gomega v1.39.1
 	github.com/paketo-buildpacks/libpak/v2 v2.0.0
 	github.com/sclevine/spec v1.4.0
@@ -15,7 +16,6 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/creack/pty v1.1.24 // indirect
-	github.com/dmikusa/bptest v0.0.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/heroku/color v0.0.6 // indirect
