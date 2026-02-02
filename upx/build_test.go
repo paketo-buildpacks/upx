@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 package upx_test
 
 import (
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/buildpacks/libcnb"
+	"github.com/buildpacks/libcnb/v2"
+	"github.com/dmikusa/bptest"
+	. "github.com/dmikusa/bptest/matchers"
 	. "github.com/onsi/gomega"
+	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/paketo-buildpacks/upx/v3/upx"
 	"github.com/sclevine/spec"
 )
@@ -31,65 +34,50 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		build upx.Build
-		ctx   libcnb.BuildContext
+		logger    log.Logger
+		buildTest *bptest.BuildTest
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build")
+		testDepsDir, err := filepath.Abs("testdata")
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
-		ctx.Buildpack.Metadata = map[string]interface{}{
-			"dependencies": []map[string]interface{}{
-				{
-					"id":      "upx",
-					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id"},
-				},
-			},
-		}
-		ctx.StackID = "test-stack-id"
+		logger = log.NewPaketoLogger(os.Stdout)
+
+		buildTest = bptest.NewBuildTest().
+			WithBuildpack(bptest.BuildpackConfig{
+				API:     "0.8",
+				ID:      "example/my-buildpack",
+				Version: "1.0.0"}).
+			WithBuildpackDependencyCache(testDepsDir).
+			WithDependencyMetadata(bptest.DependencyMetadata{
+				ID:      "upx",
+				Version: "3.96",
+				Stacks:  []string{"test-stack-id", "*"},
+				CPEs:    []string{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
+				PURL:    "pkg:generic/upx@3.96",
+				URI:     "https://localhost/stub-upx.tar.xz",
+				SHA256:  "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
+			}).
+			WithPlanEntry("upx", map[string]any{})
 	})
 
-	it.After(func() {
-		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
+	it("installs UPX when requested in the build plan", func() {
+		result := buildTest.ExecuteT(t, upx.NewBuild(logger))
+
+		Expect(result).To(HaveSucceeded())
+		Expect(result).To(HaveExactlyLayers("upx"))
+		Expect(result.Layer("upx")).To(HaveFile(filepath.Join("bin", "upx")))
 	})
 
-	it("contributes UPX for API <= 0.6", func() {
-		ctx.Buildpack.API = "0.6"
-		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
+	it("does not install UPX when absent from the build plan", func() {
+		result := buildTest.
+			WithPlan(libcnb.BuildpackPlan{}).
+			ExecuteT(t, upx.NewBuild(logger))
 
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
-	})
-
-	it("contributes UPX for API 0.7+", func() {
-		ctx.Buildpack.Metadata = map[string]interface{}{
-			"dependencies": []map[string]interface{}{
-				{
-					"id":      "upx",
-					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id"},
-					"cpes":    []string{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
-					"purl":    "pkg:generic/upx@3.96?arch=amd64",
-				},
-			},
-		}
-		ctx.Buildpack.API = "0.7"
-		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name()).To(Equal("upx"))
-
-		Expect(result.BOM.Entries).To(HaveLen(1))
-		Expect(result.BOM.Entries[0].Name).To(Equal("upx"))
+		Expect(result).To(HaveSucceeded())
+		Expect(result.Layers().Count()).To(Equal(0))
 	})
 }

@@ -1,4 +1,4 @@
-# Copyright 2018-2021 the original author or authors.
+# Copyright 2018-2026 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-api = "0.7"
+api = "0.10"
 
 [buildpack]
   description = "A Cloud Native Buildpack that provides the UPX binary compression tool"
@@ -32,24 +32,33 @@ api = "0.7"
   pre-package = "scripts/build.sh"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:upx_project:upx:5.1.0:*:*:*:*:*:*:*"]
     id = "upx"
     name = "UPX (The Ultimate Packer for eXecutables)"
-    purl = "pkg:generic/upx@3.96?arch=amd64"
-    sha256 = "ac75f5172c1c530d1b5ce7215ca9e94586c07b675a26af3b97f8421b8b8d413d"
-    stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz"
-    version = "3.96"
+    purl = "pkg:generic/upx@5.1.0?arch=amd64"
+    sha256 = "946b7269d0f7fcc1c5da0f771ea7fe9c0fed3534cf41d285980830019b4bc95e"
+    stacks = ["*"]
+    uri = "https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-amd64_linux.tar.xz"
+    version = "5.1.0"
 
     [[metadata.dependencies.licenses]]
       type = "GPL-2.0-or-later"
       uri = "https://github.com/upx/upx/blob/devel/LICENSE"
 
-[[stacks]]
-  id = "io.buildpacks.stacks.bionic"
 
-[[stacks]]
-  id = "io.paketo.stacks.tiny"
+  [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:upx_project:upx:5.1.0:*:*:*:*:*:*:*"]
+    id = "upx"
+    name = "UPX (The Ultimate Packer for eXecutables)"
+    purl = "pkg:generic/upx@5.1.0?arch=arm64"
+    sha256 = "222dde34dfa3244a31b06c97820ee651515270e524736f532ac8456783afe76e"
+    stacks = ["*"]
+    uri = "https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-arm64_linux.tar.xz"
+    version = "5.1.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "GPL-2.0-or-later"
+      uri = "https://github.com/upx/upx/blob/devel/LICENSE"
 
 [[stacks]]
   id = "*"
