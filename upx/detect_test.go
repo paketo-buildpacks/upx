@@ -20,7 +20,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/buildpacks/libcnb/v2"
+	"github.com/dmikusa/bptest"
+	. "github.com/dmikusa/bptest/matchers"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/sclevine/spec"
@@ -31,21 +32,13 @@ import (
 func testDetect(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
-
-		ctx libcnb.DetectContext
 	)
 
-	it("includes build plan options", func() {
+	it("detects with upx in the buildplan", func() {
 		logger := log.NewPaketoLogger(os.Stdout)
-		Expect(upx.NewDetect(logger)(ctx)).To(Equal(libcnb.DetectResult{
-			Pass: true,
-			Plans: []libcnb.BuildPlan{
-				{
-					Provides: []libcnb.BuildPlanProvide{
-						{Name: "upx"},
-					},
-				},
-			},
-		}))
+		result := bptest.NewDetectTest().ExecuteT(t, upx.NewDetect(logger))
+
+		Expect(result).To(HavePassed())
+		Expect(result).To(HavePlan("upx"))
 	})
 }

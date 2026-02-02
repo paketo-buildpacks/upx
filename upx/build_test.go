@@ -22,6 +22,8 @@ import (
 	"testing"
 
 	"github.com/buildpacks/libcnb/v2"
+	"github.com/dmikusa/bptest"
+	. "github.com/dmikusa/bptest/matchers"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/paketo-buildpacks/upx/v3/upx"
@@ -32,67 +34,50 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx    libcnb.BuildContext
-		logger log.Logger
+		logger    log.Logger
+		buildTest *bptest.BuildTest
 	)
 
 	it.Before(func() {
 		var err error
 
-		ctx.ApplicationPath, err = os.MkdirTemp("", "build")
+		testDepsDir, err := filepath.Abs("testdata")
 		Expect(err).NotTo(HaveOccurred())
-
-		ctx.Layers.Path, err = os.MkdirTemp("", "layers")
-		Expect(err).NotTo(HaveOccurred())
-
-		ctx.Buildpack.Path, err = os.MkdirTemp("", "buildpack")
-		Expect(err).NotTo(HaveOccurred())
-
-		// Symlink dependencies to testdata (NewDependencyCache expects <buildpackPath>/dependencies/<sha256>)
-		testdataAbs, err := filepath.Abs("testdata")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(os.Symlink(testdataAbs, filepath.Join(ctx.Buildpack.Path, "dependencies"))).To(Succeed())
 
 		logger = log.NewPaketoLogger(os.Stdout)
 
-		ctx.Buildpack.Metadata = map[string]interface{}{
-			"dependencies": []map[string]interface{}{
-				{
-					"id":      "upx",
-					"version": "3.96",
-					"stacks":  []interface{}{"test-stack-id", "*"},
-					"cpes":    []interface{}{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
-					"purl":    "pkg:generic/upx@3.96",
-					"uri":     "https://localhost/stub-upx.tar.xz",
-					"sha256":  "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
-				},
-			},
-		}
-		ctx.StackID = "test-stack-id"
-		t.Setenv("BP_ARCH", "amd64")
+		buildTest = bptest.NewBuildTest().
+			WithBuildpack(bptest.BuildpackConfig{
+				API:     "0.8",
+				ID:      "example/my-buildpack",
+				Version: "1.0.0"}).
+			WithBuildpackDependencyCache(testDepsDir).
+			WithDependencyMetadata(bptest.DependencyMetadata{
+				ID:      "upx",
+				Version: "3.96",
+				Stacks:  []string{"test-stack-id", "*"},
+				CPEs:    []string{"cpe:2.3:a:upx_project:upx:3.96:*:*:*:*:*:*:*"},
+				PURL:    "pkg:generic/upx@3.96",
+				URI:     "https://localhost/stub-upx.tar.xz",
+				SHA256:  "9645730740af103136b4afff7072bb5c511290907a4fde2c7dd6d89ce8e30eca",
+			}).
+			WithPlanEntry("upx", map[string]any{})
 	})
 
-	it.After(func() {
-		Expect(os.RemoveAll(ctx.ApplicationPath)).To(Succeed())
-		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
-		Expect(os.RemoveAll(ctx.Buildpack.Path)).To(Succeed())
+	it("installs UPX when requested in the build plan", func() {
+		result := buildTest.ExecuteT(t, upx.NewBuild(logger))
+
+		Expect(result).To(HaveSucceeded())
+		Expect(result).To(HaveExactlyLayers("upx"))
+		Expect(result.Layer("upx")).To(HaveFile(filepath.Join("bin", "upx")))
 	})
 
-	it("contributes UPX when in plan", func() {
-		ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "upx"})
+	it("does not install UPX when absent from the build plan", func() {
+		result := buildTest.
+			WithPlan(libcnb.BuildpackPlan{}).
+			ExecuteT(t, upx.NewBuild(logger))
 
-		result, err := upx.NewBuild(logger)(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(HaveLen(1))
-		Expect(result.Layers[0].Name).To(Equal("upx"))
-	})
-
-	it("does not contribute UPX when not in plan", func() {
-		// No plan entry for upx
-		result, err := upx.NewBuild(logger)(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(BeEmpty())
+		Expect(result).To(HaveSucceeded())
+		Expect(result.Layers().Count()).To(Equal(0))
 	})
 }
