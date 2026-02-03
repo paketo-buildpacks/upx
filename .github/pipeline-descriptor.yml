@@ -24,5 +24,4 @@ dependencies:
     glob:       upx-.+-amd64_linux.tar.xz
     owner:      upx
     repository: upx
-    tag_filter: v(3.*)
     token:      ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}

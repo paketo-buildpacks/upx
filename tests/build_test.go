@@ -1,6 +1,6 @@
-//go:build integration
+//go:build slow
 
-package integration
+package tests
 
 import (
 	"os"
@@ -12,6 +12,9 @@ import (
 	"github.com/paketo-buildpacks/libpak/v2/log"
 	"github.com/paketo-buildpacks/upx/v3/upx"
 )
+
+// These are slower tests and are not going to run in CI for the time being
+// They can be run locally with `go test -tags=slow ./...`
 
 func TestBuildApplication(t *testing.T) {
 	logger := log.NewPaketoLogger(os.Stdout)
