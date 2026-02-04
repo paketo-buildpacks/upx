@@ -25,3 +25,13 @@ dependencies:
     owner:      upx
     repository: upx
     token:      ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+
+# ARM64
+- name:            UPX CLI ARM64
+  id:              upx
+  uses:            docker://ghcr.io/paketo-buildpacks/actions/github-release-dependency:main
+  with:
+    glob:       upx-.+-arm64_linux.tar.xz
+    owner:      upx
+    repository: upx
+    token:      ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
