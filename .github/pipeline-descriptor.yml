@@ -35,3 +35,4 @@ dependencies:
     owner:      upx
     repository: upx
     token:      ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+    arch:       arm64
