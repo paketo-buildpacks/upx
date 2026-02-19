@@ -1,17 +1,17 @@
 module github.com/paketo-buildpacks/upx/v3
 
-go 1.25.6
+go 1.26
 
 require (
 	github.com/buildpacks/libcnb/v2 v2.1.0
 	github.com/dmikusa/bptest v0.0.1
 	github.com/onsi/gomega v1.39.1
-	github.com/paketo-buildpacks/libpak/v2 v2.0.0
+	github.com/paketo-buildpacks/libpak/v2 v2.1.0
 	github.com/sclevine/spec v1.4.0
 )
 
 require (
-	dario.cat/mergo v1.0.1 // indirect
+	dario.cat/mergo v1.0.2 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
@@ -24,7 +24,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 )
