@@ -48,16 +48,16 @@ api = "0.10"
       uri = "https://github.com/upx/upx/blob/devel/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:upx_project:upx:5.1.0:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:upx_project:upx:5.1.1:*:*:*:*:*:*:*"]
     id = "upx"
     name = "UPX (The Ultimate Packer for eXecutables)"
-    purl = "pkg:generic/upx@5.1.0?arch=arm64"
-    sha256 = "222dde34dfa3244a31b06c97820ee651515270e524736f532ac8456783afe76e"
-    source = "https://github.com/upx/upx/archive/refs/tags/v5.1.0.tar.gz"
-    source-sha256 = "7d046fcd40549fdc07464f09781d05d4ee9f6bfc8abc2f40b9d4bd506f7f4768"
+    purl = "pkg:generic/upx@5.1.1?arch=arm64"
+    sha256 = "a307c2c821eeab47607ba5c232408b22ab884cca13884682508b98f7308b8443"
+    source = "https://github.com/upx/upx/archive/refs/tags/v5.1.1.tar.gz"
+    source-sha256 = "70fea534e537750dd33e96c26a29f581157ed35d1370b7fd5e3eb74e91b02df4"
     stacks = ["*"]
-    uri = "https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-arm64_linux.tar.xz"
-    version = "5.1.0"
+    uri = "https://github.com/upx/upx/releases/download/v5.1.1/upx-5.1.1-arm64_linux.tar.xz"
+    version = "5.1.1"
 
     [[metadata.dependencies.licenses]]
       type = "GPL-2.0-or-later"
