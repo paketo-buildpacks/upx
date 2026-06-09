@@ -32,16 +32,16 @@ api = "0.10"
   pre-package = "scripts/build.sh"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:upx_project:upx:5.1.1:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:upx_project:upx:5.2.0:*:*:*:*:*:*:*"]
     id = "upx"
     name = "UPX (The Ultimate Packer for eXecutables)"
-    purl = "pkg:generic/upx@5.1.1?arch=amd64"
-    sha256 = "1ff660454227861e00772f743f66b900072116b9dc24f6ee28b97cce88a7828a"
-    source = "https://github.com/upx/upx/archive/refs/tags/v5.1.1.tar.gz"
-    source-sha256 = "70fea534e537750dd33e96c26a29f581157ed35d1370b7fd5e3eb74e91b02df4"
+    purl = "pkg:generic/upx@5.2.0?arch=amd64"
+    sha256 = "3db5d3294707439db97866feab8d75d800f028f48481a40547411824da4288a1"
+    source = "https://github.com/upx/upx/archive/refs/tags/v5.2.0.tar.gz"
+    source-sha256 = "e58526f3e198164d63b99b3580dbb9a5111a02a3e4ab1b22b05add4f04c56bbc"
     stacks = ["*"]
-    uri = "https://github.com/upx/upx/releases/download/v5.1.1/upx-5.1.1-amd64_linux.tar.xz"
-    version = "5.1.1"
+    uri = "https://github.com/upx/upx/releases/download/v5.2.0/upx-5.2.0-amd64_linux.tar.xz"
+    version = "5.2.0"
 
     [[metadata.dependencies.licenses]]
       type = "GPL-2.0-or-later"
