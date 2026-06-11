@@ -45,6 +45,7 @@ func NewBuild(logger log.Logger) libcnb.BuildFunc {
 		if _, ok, err := pr.Resolve(PlanEntryUpx); err != nil {
 			return nil, fmt.Errorf("unable to resolve UPX plan entry\n%w", err)
 		} else if ok {
+			//nolint:staticcheck // SA1019 StackID still required for compatibility with older buildpacks API
 			dr, err := libpak.NewDependencyResolver(md, context.StackID)
 			if err != nil {
 				return nil, fmt.Errorf("unable to create dependency resolver\n%w", err)

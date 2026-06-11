@@ -63,6 +63,11 @@ api = "0.10"
       type = "GPL-2.0-or-later"
       uri = "https://github.com/upx/upx/blob/devel/LICENSE"
 
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "upx"
+    patches = 2
+
 [[stacks]]
   id = "*"
 
