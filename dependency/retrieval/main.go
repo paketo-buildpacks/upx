@@ -67,11 +67,16 @@ func main() {
 		}
 	}
 
-	// Get existing versions
-	existingVersions := make(map[string]bool)
+	// Get maximum existing version
+	var maxExistingVersion *semver.Version
 	for _, dep := range config.Metadata.Dependencies {
 		if dep.ID == "upx" {
-			existingVersions[dep.Version] = true
+			v, err := semver.NewVersion(dep.Version)
+			if err == nil {
+				if maxExistingVersion == nil || v.GreaterThan(maxExistingVersion) {
+					maxExistingVersion = v
+				}
+			}
 		}
 	}
 
@@ -86,10 +91,16 @@ func main() {
 
 	for _, release := range releases {
 		versionStr := strings.TrimPrefix(release.TagName, "v")
-		if existingVersions[versionStr] {
+		v, err := semver.NewVersion(versionStr)
+		if err != nil {
+			fmt.Printf("Skipping %s: unable to parse version\n", versionStr)
 			continue
 		}
-		if !matchesConstraints(versionStr, constraints) {
+		if maxExistingVersion != nil && !v.GreaterThan(maxExistingVersion) {
+			fmt.Printf("Skipping %s: not newer than max existing version %s\n", versionStr, maxExistingVersion.String())
+			continue
+		}
+		if !matchesConstraints(v, constraints) {
 			continue
 		}
 
@@ -134,6 +145,7 @@ func main() {
 
 		output = append(output, OutputMetadata{
 			ID:             "upx",
+			Name:           "UPX (The Ultimate Packer for eXecutables)",
 			Version:        versionStr,
 			URI:            amd64Asset.BrowserDownloadURL,
 			Checksum:       "sha256:" + amd64Checksum,
@@ -150,6 +162,7 @@ func main() {
 
 		output = append(output, OutputMetadata{
 			ID:             "upx",
+			Name:           "UPX (The Ultimate Packer for eXecutables)",
 			Version:        versionStr,
 			URI:            arm64Asset.BrowserDownloadURL,
 			Checksum:       "sha256:" + arm64Checksum,
@@ -184,19 +197,20 @@ func main() {
 }
 
 type OutputMetadata struct {
-	ID             string            `json:"id"`
-	Version        string            `json:"version"`
-	URI            string            `json:"uri"`
-	Checksum       string            `json:"checksum"`
-	Source         string            `json:"source,omitempty"`
-	SourceChecksum string            `json:"source-checksum,omitempty"`
-	Target         string            `json:"target"`
-	OS             string            `json:"os,omitempty"`
-	Arch           string            `json:"arch,omitempty"`
-	CPE            string            `json:"cpe,omitempty"`
-	PURL           string            `json:"purl,omitempty"`
+	ID             string              `json:"id"`
+	Name           string              `json:"name"`
+	Version        string              `json:"version"`
+	URI            string              `json:"uri"`
+	Checksum       string              `json:"checksum"`
+	Source         string              `json:"source,omitempty"`
+	SourceChecksum string              `json:"source-checksum,omitempty"`
+	Target         string              `json:"target"`
+	OS             string              `json:"os,omitempty"`
+	Arch           string              `json:"arch,omitempty"`
+	CPE            string              `json:"cpe,omitempty"`
+	PURL           string              `json:"purl,omitempty"`
 	Licenses       []map[string]string `json:"licenses,omitempty"`
-	Stacks         []string          `json:"stacks,omitempty"`
+	Stacks         []string            `json:"stacks,omitempty"`
 }
 
 type GitHubAsset struct {
@@ -296,13 +310,9 @@ func computeChecksum(uri string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func matchesConstraints(versionStr string, constraints []cargo.ConfigMetadataDependencyConstraint) bool {
+func matchesConstraints(v *semver.Version, constraints []cargo.ConfigMetadataDependencyConstraint) bool {
 	if len(constraints) == 0 {
 		return true
-	}
-	v, err := semver.NewVersion(versionStr)
-	if err != nil {
-		return false
 	}
 	for _, c := range constraints {
 		cstr, err := semver.NewConstraint(c.Constraint)
