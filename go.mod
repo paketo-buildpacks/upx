@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/buildpacks/libcnb/v2 v2.1.0
 	github.com/dmikusa/bptest v0.0.1
-	github.com/onsi/gomega v1.41.0
+	github.com/onsi/gomega v1.42.0
 	github.com/paketo-buildpacks/libpak/v2 v2.2.0
 	github.com/sclevine/spec v1.4.0
 )
