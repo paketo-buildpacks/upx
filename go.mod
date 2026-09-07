@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/upx/v3
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/buildpacks/libcnb/v2 v2.1.0
