@@ -149,6 +149,7 @@ func main() {
 			Version:        versionStr,
 			URI:            amd64Asset.BrowserDownloadURL,
 			Checksum:       "sha256:" + amd64Checksum,
+			SHA256:         amd64Checksum,
 			Source:         sourceURL,
 			SourceChecksum: "sha256:" + sourceChecksum,
 			Target:         "linux-amd64",
@@ -166,6 +167,7 @@ func main() {
 			Version:        versionStr,
 			URI:            arm64Asset.BrowserDownloadURL,
 			Checksum:       "sha256:" + arm64Checksum,
+			SHA256:         arm64Checksum,
 			Source:         sourceURL,
 			SourceChecksum: "sha256:" + sourceChecksum,
 			Target:         "linux-arm64",
@@ -202,6 +204,7 @@ type OutputMetadata struct {
 	Version        string              `json:"version"`
 	URI            string              `json:"uri"`
 	Checksum       string              `json:"checksum"`
+	SHA256         string              `json:"sha256,omitempty"`
 	Source         string              `json:"source,omitempty"`
 	SourceChecksum string              `json:"source-checksum,omitempty"`
 	Target         string              `json:"target"`
