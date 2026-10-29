@@ -18,20 +18,6 @@ api = "0.10"
   pre-package = "scripts/build.sh --target linux/amd64 --target linux/arm64"
 
   [[metadata.dependencies]]
-    id = "upx"
-    name = "UPX (The Ultimate Packer for eXecutables)"
-    purl = "pkg:generic/upx@5.2.0?arch=amd64"
-    sha256 = "3db5d3294707439db97866feab8d75d800f028f48481a40547411824da4288a1"
-    source = "https://github.com/upx/upx/archive/refs/tags/v5.2.0.tar.gz"
-    stacks = ["*"]
-    uri = "https://github.com/upx/upx/releases/download/v5.2.0/upx-5.2.0-amd64_linux.tar.xz"
-    version = "5.2.0"
-
-    [[metadata.dependencies.licenses]]
-      type = "GPL-2.0-or-later"
-      uri = "https://github.com/upx/upx/blob/devel/LICENSE"
-
-  [[metadata.dependencies]]
     arch = "amd64"
     checksum = "sha256:402162aad30af47e60dbd767fb2e64ca394ace9727ba1f40283641f1d1b91657"
     cpe = "cpe:2.3:a:upx_project:upx:5.2.1:*:*:*:*:*:*:*"
@@ -62,6 +48,44 @@ api = "0.10"
     stacks = ["*"]
     uri = "https://github.com/upx/upx/releases/download/v5.2.1/upx-5.2.1-arm64_linux.tar.xz"
     version = "5.2.1"
+
+    [[metadata.dependencies.licenses]]
+      type = "GPL-2.0-or-later"
+      uri = "https://github.com/upx/upx/blob/devel/LICENSE"
+
+  [[metadata.dependencies]]
+    arch = "amd64"
+    checksum = "sha256:79cea8a50b6fa102d10c7b79a419cd77dead3cc2d78661de2dc5e5815dc505c1"
+    cpe = "cpe:2.3:a:upx_project:upx:5.3.0:*:*:*:*:*:*:*"
+    id = "upx"
+    name = "UPX (The Ultimate Packer for eXecutables)"
+    os = "linux"
+    purl = "pkg:generic/upx@5.3.0?arch=amd64"
+    sha256 = "79cea8a50b6fa102d10c7b79a419cd77dead3cc2d78661de2dc5e5815dc505c1"
+    source = "https://github.com/upx/upx/archive/refs/tags/v5.3.0.tar.gz"
+    source-checksum = "sha256:fbefd850ee624dc072eb9de2844753dcf8c588ef40c0a92c4a5bfabd6ed46c3e"
+    stacks = ["*"]
+    uri = "https://github.com/upx/upx/releases/download/v5.3.0/upx-5.3.0-amd64_linux.tar.xz"
+    version = "5.3.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "GPL-2.0-or-later"
+      uri = "https://github.com/upx/upx/blob/devel/LICENSE"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    checksum = "sha256:2a4afa860ac7aa6968f88df7841823746e5d00ba56affdf9342c2f5254fb776f"
+    cpe = "cpe:2.3:a:upx_project:upx:5.3.0:*:*:*:*:*:*:*"
+    id = "upx"
+    name = "UPX (The Ultimate Packer for eXecutables)"
+    os = "linux"
+    purl = "pkg:generic/upx@5.3.0?arch=arm64"
+    sha256 = "2a4afa860ac7aa6968f88df7841823746e5d00ba56affdf9342c2f5254fb776f"
+    source = "https://github.com/upx/upx/archive/refs/tags/v5.3.0.tar.gz"
+    source-checksum = "sha256:fbefd850ee624dc072eb9de2844753dcf8c588ef40c0a92c4a5bfabd6ed46c3e"
+    stacks = ["*"]
+    uri = "https://github.com/upx/upx/releases/download/v5.3.0/upx-5.3.0-arm64_linux.tar.xz"
+    version = "5.3.0"
 
     [[metadata.dependencies.licenses]]
       type = "GPL-2.0-or-later"
