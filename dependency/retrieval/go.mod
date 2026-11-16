@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/upx/v3/dependency/retrieval
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/BurntSushi/toml v1.6.0
